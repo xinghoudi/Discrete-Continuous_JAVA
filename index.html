@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>离散—连续转换实验室</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@13.1.1/lib/browser/math.min.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="page-header">
+        <h1>离散—连续转换实验室</h1>
+        <p>观察数列如何演化为函数，差分如何演化为导数</p>
+      </header>
+
+      <section class="control-band" aria-label="稠密化控制">
+        <div class="slider-row">
+          <label for="densitySlider">离散程度</label>
+          <input id="densitySlider" type="range" min="1" max="10" step="1" value="1" />
+          <output id="densityValue" for="densitySlider">1</output>
+        </div>
+        <button id="autoDemoButton" type="button">自动演示</button>
+      </section>
+
+      <section id="errorBox" class="error-box" hidden></section>
+
+      <section class="chart-grid" aria-label="可视化区域">
+        <article class="chart-panel">
+          <h2>数列 → 函数</h2>
+          <div id="sequenceChart" class="chart"></div>
+        </article>
+
+        <article class="chart-panel">
+          <h2>差分 → 导函数</h2>
+          <div id="differenceChart" class="chart"></div>
+        </article>
+      </section>
+
+      <section class="math-note" aria-label="数学说明">
+        <h2>数学说明</h2>
+        <div class="formula-grid">
+          <p><strong>输入数列：</strong><code id="sequenceFormula"></code></p>
+          <p><strong>对应函数：</strong><code id="functionFormula"></code></p>
+          <p><strong>差分：</strong><code id="differenceFormula"></code></p>
+          <p><strong>导函数：</strong><code id="derivativeFormula"></code></p>
+        </div>
+        <div class="explanation">
+          <p>数列是定义在整数点上的离散函数。</p>
+          <p>差分描述相邻项之间的变化量。</p>
+          <p>导数描述连续函数的瞬时变化率。</p>
+          <p>随着采样点越来越密，离散差分逐渐逼近连续导数。</p>
+        </div>
+      </section>
+
+      <section class="input-panel" aria-label="输入设置">
+        <form id="visualForm">
+          <label for="expressionInput">请输入数列表达式：</label>
+          <input
+            id="expressionInput"
+            name="expression"
+            type="text"
+            value="n**2"
+            autocomplete="off"
+            placeholder="例如：n**2、n**3、log(n)/n、exp(n/10)"
+          />
+
+          <p class="range-title">设置自变量取值范围：例如 0 到 100</p>
+          <div class="range-grid">
+            <label>
+              自变量起点：
+              <input id="xMinInput" name="xMin" type="number" value="1" step="1" />
+            </label>
+            <label>
+              自变量终点：
+              <input id="xMaxInput" name="xMax" type="number" value="20" step="1" />
+            </label>
+          </div>
+
+          <button type="submit">生成可视化</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

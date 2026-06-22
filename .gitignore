@@ -1,0 +1,14 @@
+# macOS and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Environment files
+.env
+.env.*
+
+# Dependency folders if added later
+node_modules/
+
+# Logs
+*.log
