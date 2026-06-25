@@ -72,8 +72,7 @@ function validateVariableRange(xMin, xMax) {
 
 function densityToStep(density) {
   const clampedDensity = Math.min(Math.max(density, 1), 10);
-  const normalizedDensity = (clampedDensity - 1) / 9;
-  return Math.pow(0.03, normalizedDensity);
+  return 1 / 2 ** clampedDensity;
 }
 
 function compileExpression(expressionText) {
@@ -122,7 +121,7 @@ function makeRange(start, stop, step) {
   const safeStep = Math.max(step, 1e-6);
   for (let value = start; value <= stop + safeStep / 2; value += safeStep) {
     values.push(Number(value.toFixed(10)));
-    if (values.length > 50000) {
+    if (values.length > 120000) {
       break;
     }
   }
@@ -209,7 +208,7 @@ function buildSequenceChart(compiled) {
     },
   ];
 
-  if (state.density > 1) {
+  if (state.density >= 1) {
     const step = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, step);
     const samplePoints = getValidPoints(sampleValues, (value) =>
@@ -260,7 +259,7 @@ function buildDifferenceChart(compiled) {
     },
   ];
 
-  if (state.density > 1) {
+  if (state.density >= 1) {
     const h = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, h);
     const samplePoints = getValidPoints(sampleValues, (value) => {
@@ -319,7 +318,7 @@ function render() {
   buildSequenceChart(compiled);
   buildDifferenceChart(compiled);
   renderFormulas(compiled);
-  elements.densityValue.textContent = String(state.density);
+  elements.densityValue.textContent = `n=${state.density}, h=1/${2 ** state.density}`;
   elements.densitySlider.value = String(state.density);
 }
 
@@ -349,7 +348,7 @@ function handleSubmit(event) {
 
 function handleDensityChange() {
   state.density = Number(elements.densitySlider.value);
-  elements.densityValue.textContent = String(state.density);
+  elements.densityValue.textContent = `n=${state.density}, h=1/${2 ** state.density}`;
   clearError();
   render();
 }

@@ -70,7 +70,7 @@ body {
 
 .slider-row {
   display: grid;
-  grid-template-columns: auto minmax(180px, 560px) 42px;
+  grid-template-columns: auto minmax(180px, 560px) 130px;
   align-items: center;
   gap: 14px;
   width: 100%;
@@ -251,7 +251,7 @@ input:focus {
   }
 
   .slider-row {
-    grid-template-columns: 1fr 42px;
+    grid-template-columns: 1fr 130px;
   }
 
   .slider-row label {
