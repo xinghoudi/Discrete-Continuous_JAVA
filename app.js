@@ -1,6 +1,6 @@
 const state = {
   expressionText: "n**2",
-  density: 1,
+  density: 0,
   xMin: 1,
   xMax: 20,
   autoTimer: null,
@@ -71,8 +71,8 @@ function validateVariableRange(xMin, xMax) {
 }
 
 function densityToStep(density) {
-  const clampedDensity = Math.min(Math.max(density, 1), 10);
-  return 1 / 2 ** clampedDensity;
+  const clampedDensity = Math.min(Math.max(density, 0), 10);
+  return 1 / (clampedDensity + 1);
 }
 
 function compileExpression(expressionText) {
@@ -153,7 +153,7 @@ function getValidPoints(values, evaluator) {
 }
 
 function markerSize(density) {
-  return Math.max(1.6, 4.8 - density * 0.3);
+  return Math.max(1.8, 5.2 - density * 0.28);
 }
 
 function commonLayout(xTitle, yTitle) {
@@ -208,7 +208,7 @@ function buildSequenceChart(compiled) {
     },
   ];
 
-  if (state.density >= 1) {
+  if (state.density > 0) {
     const step = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, step);
     const samplePoints = getValidPoints(sampleValues, (value) =>
@@ -259,7 +259,7 @@ function buildDifferenceChart(compiled) {
     },
   ];
 
-  if (state.density >= 1) {
+  if (state.density > 0) {
     const h = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, h);
     const samplePoints = getValidPoints(sampleValues, (value) => {
@@ -318,7 +318,7 @@ function render() {
   buildSequenceChart(compiled);
   buildDifferenceChart(compiled);
   renderFormulas(compiled);
-  elements.densityValue.textContent = `n=${state.density}, h=1/${2 ** state.density}`;
+  elements.densityValue.textContent = `新增点=${state.density}, h=1/${state.density + 1}`;
   elements.densitySlider.value = String(state.density);
 }
 
@@ -336,7 +336,7 @@ function handleSubmit(event) {
     state.expressionText = nextExpression;
     state.xMin = nextXMin;
     state.xMax = nextXMax;
-    state.density = 1;
+    state.density = 0;
     stopAutoDemo();
     clearError();
     render();
@@ -348,7 +348,7 @@ function handleSubmit(event) {
 
 function handleDensityChange() {
   state.density = Number(elements.densitySlider.value);
-  elements.densityValue.textContent = `n=${state.density}, h=1/${2 ** state.density}`;
+  elements.densityValue.textContent = `新增点=${state.density}, h=1/${state.density + 1}`;
   clearError();
   render();
 }
@@ -363,7 +363,7 @@ function stopAutoDemo() {
 
 function startAutoDemo() {
   stopAutoDemo();
-  state.density = 1;
+  state.density = 0;
   clearError();
   render();
   elements.autoDemoButton.disabled = true;
