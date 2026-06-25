@@ -85,6 +85,7 @@ function compileExpression(expressionText) {
   const sequenceCode = math.compile(normalizedExpression);
   const functionCode = math.compile(functionExpression);
   const derivativeExpression = math.derivative(functionExpression, "x").toString();
+  const derivativeCode = math.compile(derivativeExpression);
   const differenceExpression = buildDifferenceExpression(normalizedExpression);
 
   return {
@@ -93,6 +94,7 @@ function compileExpression(expressionText) {
     sequenceCode,
     functionCode,
     derivativeExpression,
+    derivativeCode,
     differenceExpression,
   };
 }
@@ -214,7 +216,7 @@ function buildSequenceChart(compiled) {
     });
   }
 
-  if (state.showFunction && state.density > 0) {
+  if (state.density > 0) {
     const step = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, step);
     const samplePoints = getValidPoints(sampleValues, (value) =>
@@ -230,6 +232,27 @@ function buildSequenceChart(compiled) {
       marker: {
         size: markerSize(state.density),
         color: "#ef4444",
+      },
+      hovertemplate: "x=%{x:.3g}<br>f(x)=%{y:.4g}<extra></extra>",
+    });
+  }
+
+  if (state.showFunction) {
+    const curveStep = Math.max((state.xMax - state.xMin) / 500, 0.002);
+    const curveValues = makeRange(state.xMin, state.xMax, curveStep);
+    const curvePoints = getValidPoints(curveValues, (value) =>
+      evaluateCompiled(compiled.functionCode, "x", value),
+    );
+
+    traces.push({
+      x: curvePoints.xValues,
+      y: curvePoints.yValues,
+      mode: "lines",
+      type: "scatter",
+      name: "函数曲线 f(x)",
+      line: {
+        color: "#ef4444",
+        width: 2.5,
       },
       hovertemplate: "x=%{x:.3g}<br>f(x)=%{y:.4g}<extra></extra>",
     });
@@ -267,7 +290,7 @@ function buildDifferenceChart(compiled) {
     });
   }
 
-  if (state.showFunction && state.density > 0) {
+  if (state.density > 0) {
     const h = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, h);
     const samplePoints = getValidPoints(sampleValues, (value) => {
@@ -287,6 +310,27 @@ function buildDifferenceChart(compiled) {
         color: "#ef4444",
       },
       hovertemplate: "x=%{x:.3g}<br>变化率≈%{y:.4g}<extra></extra>",
+    });
+  }
+
+  if (state.showFunction) {
+    const curveStep = Math.max((state.xMax - state.xMin) / 500, 0.002);
+    const curveValues = makeRange(state.xMin, state.xMax, curveStep);
+    const curvePoints = getValidPoints(curveValues, (value) =>
+      evaluateCompiled(compiled.derivativeCode, "x", value),
+    );
+
+    traces.push({
+      x: curvePoints.xValues,
+      y: curvePoints.yValues,
+      mode: "lines",
+      type: "scatter",
+      name: "导函数 f'(x)",
+      line: {
+        color: "#ef4444",
+        width: 2.5,
+      },
+      hovertemplate: "x=%{x:.3g}<br>f'(x)=%{y:.4g}<extra></extra>",
     });
   }
 
@@ -328,9 +372,8 @@ function render() {
   renderFormulas(compiled);
   elements.densityValue.textContent = `采样点=${state.density}`;
   elements.densitySlider.value = String(state.density);
-  const functionVisible = state.showFunction && state.density > 0;
   elements.sequenceToggleButton.textContent = state.showSequence ? "清除数列图像" : "生成数列图像";
-  elements.functionToggleButton.textContent = functionVisible ? "清除函数图像" : "生成函数图像";
+  elements.functionToggleButton.textContent = state.showFunction ? "清除函数图像" : "生成函数图像";
 }
 
 function inputsChanged(nextExpression, nextXMin, nextXMax) {
@@ -365,11 +408,7 @@ function handleSubmit(event) {
       state.showSequence = shouldGenerate ? true : !state.showSequence;
     }
     if (action === "function") {
-      const functionVisible = state.showFunction && state.density > 0;
-      state.showFunction = shouldGenerate ? true : !functionVisible;
-      if (state.showFunction && state.density === 0) {
-        state.density = 1;
-      }
+      state.showFunction = shouldGenerate ? true : !state.showFunction;
     }
     stopAutoDemo();
     clearError();
