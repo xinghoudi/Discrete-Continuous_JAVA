@@ -252,8 +252,8 @@ function buildDifferenceChart(compiled) {
       name: "差分 Δa_n",
       marker: {
         size: 6,
-        color: "#f97316",
-        line: { width: 1, color: "#ffffff" },
+        color: "#facc15",
+        line: { width: 1, color: "#854d0e" },
       },
       hovertemplate: "n=%{x}<br>Δa_n=%{y:.4g}<extra></extra>",
     },
