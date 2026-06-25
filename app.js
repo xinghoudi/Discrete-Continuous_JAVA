@@ -209,8 +209,8 @@ function buildSequenceChart(compiled) {
       name: "整数点 a_n",
       marker: {
         size: 6,
-        color: "#2563eb",
-        line: { width: 1, color: "#ffffff" },
+        color: "#facc15",
+        line: { width: 1, color: "#854d0e" },
       },
       hovertemplate: "n=%{x}<br>a_n=%{y:.4g}<extra></extra>",
     });
@@ -251,7 +251,7 @@ function buildSequenceChart(compiled) {
       type: "scatter",
       name: "函数曲线 f(x)",
       line: {
-        color: "#ef4444",
+        color: "#2563eb",
         width: 2.5,
       },
       hovertemplate: "x=%{x:.3g}<br>f(x)=%{y:.4g}<extra></extra>",
@@ -327,7 +327,7 @@ function buildDifferenceChart(compiled) {
       type: "scatter",
       name: "导函数 f'(x)",
       line: {
-        color: "#ef4444",
+        color: "#2563eb",
         width: 2.5,
       },
       hovertemplate: "x=%{x:.3g}<br>f'(x)=%{y:.4g}<extra></extra>",
