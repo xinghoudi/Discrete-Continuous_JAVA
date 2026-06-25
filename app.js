@@ -71,7 +71,7 @@ function validateVariableRange(xMin, xMax) {
 }
 
 function densityToStep(density) {
-  const clampedDensity = Math.min(Math.max(density, 0), 10);
+  const clampedDensity = Math.min(Math.max(density, 0), 15);
   return 1 / (clampedDensity + 1);
 }
 
@@ -318,7 +318,7 @@ function render() {
   buildSequenceChart(compiled);
   buildDifferenceChart(compiled);
   renderFormulas(compiled);
-  elements.densityValue.textContent = `新增点=${state.density}, h=1/${state.density + 1}`;
+  elements.densityValue.textContent = `采样点=${state.density}`;
   elements.densitySlider.value = String(state.density);
 }
 
@@ -348,7 +348,7 @@ function handleSubmit(event) {
 
 function handleDensityChange() {
   state.density = Number(elements.densitySlider.value);
-  elements.densityValue.textContent = `新增点=${state.density}, h=1/${state.density + 1}`;
+  elements.densityValue.textContent = `采样点=${state.density}`;
   clearError();
   render();
 }
@@ -369,7 +369,7 @@ function startAutoDemo() {
   elements.autoDemoButton.disabled = true;
 
   state.autoTimer = window.setInterval(() => {
-    if (state.density >= 10) {
+    if (state.density >= 15) {
       stopAutoDemo();
       return;
     }
