@@ -3,6 +3,8 @@ const state = {
   density: 0,
   xMin: 1,
   xMax: 20,
+  showSequence: true,
+  showFunction: false,
   autoTimer: null,
 };
 
@@ -21,6 +23,8 @@ const elements = {
   expressionInput: document.querySelector("#expressionInput"),
   xMinInput: document.querySelector("#xMinInput"),
   xMaxInput: document.querySelector("#xMaxInput"),
+  sequenceToggleButton: document.querySelector("#sequenceToggleButton"),
+  functionToggleButton: document.querySelector("#functionToggleButton"),
 };
 
 function normalizeExpression(expressionText) {
@@ -187,13 +191,15 @@ function commonLayout(xTitle, yTitle) {
 }
 
 function buildSequenceChart(compiled) {
-  const integerValues = integerPointsInRange(state.xMin, state.xMax);
-  const integerPoints = getValidPoints(integerValues, (value) =>
-    evaluateCompiled(compiled.functionCode, "x", value),
-  );
+  const traces = [];
 
-  const traces = [
-    {
+  if (state.showSequence) {
+    const integerValues = integerPointsInRange(state.xMin, state.xMax);
+    const integerPoints = getValidPoints(integerValues, (value) =>
+      evaluateCompiled(compiled.functionCode, "x", value),
+    );
+
+    traces.push({
       x: integerPoints.xValues,
       y: integerPoints.yValues,
       mode: "markers",
@@ -205,10 +211,10 @@ function buildSequenceChart(compiled) {
         line: { width: 1, color: "#ffffff" },
       },
       hovertemplate: "n=%{x}<br>a_n=%{y:.4g}<extra></extra>",
-    },
-  ];
+    });
+  }
 
-  if (state.density > 0) {
+  if (state.showFunction && state.density > 0) {
     const step = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, step);
     const samplePoints = getValidPoints(sampleValues, (value) =>
@@ -223,7 +229,7 @@ function buildSequenceChart(compiled) {
       name: "稠密化采样 f(x)",
       marker: {
         size: markerSize(state.density),
-        color: "#14b8a6",
+        color: "#ef4444",
       },
       hovertemplate: "x=%{x:.3g}<br>f(x)=%{y:.4g}<extra></extra>",
     });
@@ -236,15 +242,17 @@ function buildSequenceChart(compiled) {
 }
 
 function buildDifferenceChart(compiled) {
-  const integerValues = integerPointsInRange(state.xMin, state.xMax, false);
-  const integerPoints = getValidPoints(integerValues, (value) => {
-    const currentValue = evaluateCompiled(compiled.functionCode, "x", value);
-    const nextValue = evaluateCompiled(compiled.functionCode, "x", value + 1);
-    return currentValue === null || nextValue === null ? null : nextValue - currentValue;
-  });
+  const traces = [];
 
-  const traces = [
-    {
+  if (state.showSequence) {
+    const integerValues = integerPointsInRange(state.xMin, state.xMax, false);
+    const integerPoints = getValidPoints(integerValues, (value) => {
+      const currentValue = evaluateCompiled(compiled.functionCode, "x", value);
+      const nextValue = evaluateCompiled(compiled.functionCode, "x", value + 1);
+      return currentValue === null || nextValue === null ? null : nextValue - currentValue;
+    });
+
+    traces.push({
       x: integerPoints.xValues,
       y: integerPoints.yValues,
       mode: "markers",
@@ -256,10 +264,10 @@ function buildDifferenceChart(compiled) {
         line: { width: 1, color: "#854d0e" },
       },
       hovertemplate: "n=%{x}<br>Δa_n=%{y:.4g}<extra></extra>",
-    },
-  ];
+    });
+  }
 
-  if (state.density > 0) {
+  if (state.showFunction && state.density > 0) {
     const h = densityToStep(state.density);
     const sampleValues = makeRange(state.xMin, state.xMax, h);
     const samplePoints = getValidPoints(sampleValues, (value) => {
@@ -320,10 +328,23 @@ function render() {
   renderFormulas(compiled);
   elements.densityValue.textContent = `采样点=${state.density}`;
   elements.densitySlider.value = String(state.density);
+  const functionVisible = state.showFunction && state.density > 0;
+  elements.sequenceToggleButton.textContent = state.showSequence ? "清除数列图像" : "生成数列图像";
+  elements.functionToggleButton.textContent = functionVisible ? "清除函数图像" : "生成函数图像";
+}
+
+function inputsChanged(nextExpression, nextXMin, nextXMax) {
+  return (
+    nextExpression !== state.expressionText ||
+    nextXMin !== state.xMin ||
+    nextXMax !== state.xMax
+  );
 }
 
 function handleSubmit(event) {
   event.preventDefault();
+  const submitter = event.submitter;
+  const action = submitter?.value;
   const nextExpression = elements.expressionInput.value;
   const nextXMin = Number(elements.xMinInput.value);
   const nextXMax = Number(elements.xMaxInput.value);
@@ -332,11 +353,24 @@ function handleSubmit(event) {
     validateVariableRange(nextXMin, nextXMax);
     const compiled = compileExpression(nextExpression);
     validateRenderableExpression(compiled, nextXMin, nextXMax);
+    const shouldGenerate = inputsChanged(nextExpression, nextXMin, nextXMax);
 
     state.expressionText = nextExpression;
     state.xMin = nextXMin;
     state.xMax = nextXMax;
-    state.density = 0;
+    if (shouldGenerate) {
+      state.density = 0;
+    }
+    if (action === "sequence") {
+      state.showSequence = shouldGenerate ? true : !state.showSequence;
+    }
+    if (action === "function") {
+      const functionVisible = state.showFunction && state.density > 0;
+      state.showFunction = shouldGenerate ? true : !functionVisible;
+      if (state.showFunction && state.density === 0) {
+        state.density = 1;
+      }
+    }
     stopAutoDemo();
     clearError();
     render();
